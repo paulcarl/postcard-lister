@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QTabWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog,
-                             QLineEdit, QTextEdit, QMessageBox, QFormLayout, QTextBrowser)
+                             QLineEdit, QTextEdit, QMessageBox, QFormLayout, QTextBrowser, QHBoxLayout)
 from core.utils import load_settings, save_settings, get_image_pairs, has_been_processed
 from core.image_processor import process_image_set
 from core.vision_handler import get_postcard_metadata
@@ -23,7 +23,7 @@ class SettingsTab(QWidget):
         self.aws_secret = QLineEdit(); self.aws_secret.setEchoMode(QLineEdit.Password)
         self.aws_region = QLineEdit(); self.aws_region.setPlaceholderText("e.g. us-east-1")
         self.openai_key = QLineEdit(); self.openai_key.setEchoMode(QLineEdit.Password)
-        self.s3_url = QLineEdit(); self.s3_bucket = QLineEdit()
+        self.s3_bucket = QLineEdit()
         self.bg_color = QLineEdit(); self.shipping_policy = QLineEdit()
         self.return_policy = QLineEdit(); self.payment_policy = QLineEdit()
         self.zip_code = QLineEdit()
@@ -35,9 +35,14 @@ class SettingsTab(QWidget):
         self.custom_html = QTextEdit()
         self.save_btn = QPushButton("Save Settings"); self.save_btn.clicked.connect(self.save_settings)
 
+        # Add input directory and browse button in a horizontal layout
+        input_dir_layout = QHBoxLayout()
+        input_dir_layout.addWidget(self.input_dir)
+        input_dir_layout.addWidget(self.browse_btn)
+        self.form.addRow("Input Directory:", input_dir_layout)
+
         self.form.addRow("AWS Access Key:", self.aws_key)
         self.form.addRow("AWS Secret Key:", self.aws_secret)
-        self.form.addRow("S3 Base URL:", self.s3_url)
         self.form.addRow("S3 Bucket Name:", self.s3_bucket)
         self.form.addRow("AWS Region:", self.aws_region)
         self.form.addRow("OpenAI API Key:", self.openai_key)
@@ -49,7 +54,6 @@ class SettingsTab(QWidget):
         self.form.addRow("Return Policy Name:", self.return_policy)
         self.form.addRow("Payment Policy Name:", self.payment_policy)
         self.form.addRow("Postcard Store Category ID:", self.store_category_id)
-        self.form.addRow("Input Directory:", self.input_dir)
         self.form.addRow(QLabel("Custom HTML Description Template:"))
         self.form.addRow(self.custom_html)
 
@@ -73,7 +77,6 @@ class SettingsTab(QWidget):
         data = load_settings(SETTINGS_PATH)
         self.aws_key.setText(data.get("aws_access_key", ""))
         self.aws_secret.setText(data.get("aws_secret_key", ""))
-        self.s3_url.setText(data.get("s3_base_url", ""))
         self.s3_bucket.setText(data.get("s3_bucket", ""))
         self.bg_color.setText(data.get("background_color", "#FFFFFF"))
         self.shipping_policy.setText(data.get("shipping_policy", ""))
@@ -93,7 +96,6 @@ class SettingsTab(QWidget):
         data = {
             "aws_access_key": self.aws_key.text(),
             "aws_secret_key": self.aws_secret.text(),
-            "s3_base_url": self.s3_url.text(),
             "s3_bucket": self.s3_bucket.text(),
             "background_color": self.bg_color.text(),
             "shipping_policy": self.shipping_policy.text(),
